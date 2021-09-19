@@ -1,0 +1,4 @@
+services:
+  custom_scorm.user_status:
+    class: Drupal\custom_scorm\UserStatusHandler
+    arguments: ['@user.data', '@current_user']

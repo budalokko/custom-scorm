@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * Implements hook_user_view().
+ */
+function custom_scorm_user_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+
+  /** @var \Drupal\custom_scorm\UserStatusHandler $scorm_status_service */
+  $scorm_status_service = \Drupal::service('custom_scorm.user_status');
+
+  $user_statuses = $scorm_status_service->getAllForCurrentUser();
+
+  if (empty($user_statuses)) {
+    $render_array = [
+      '#type' => '#markup',
+      '#markup' => '<p>You haven\'t started any activites yet.</p>',
+    ];
+  }
+  else {
+    $render_array = [
+      '#theme' => 'table',
+      '#header' => ['Scorm id', 'Location', 'Completion Status', 'Total items', 'Created', 'Last updated'],
+      '#rows' => array_map([$scorm_status_service, 'getRenderableRow'], $user_statuses),
+    ];
+  }
+
+  $render_array['#prefix'] = '<h3>Status in your training activities:</h3>';
+
+  $build[] = $render_array;
+}
+
+/**
+ * Implements hook_opigno_scorm_commit().
+ */
+function custom_scorm_opigno_scorm_commit($scorm, $opigno_scorm_sco_id, $data) {
+
+  /** @var \Drupal\custom_scorm\UserStatusHandler $scorm_user_status */
+  $scorm_user_status = \Drupal::service('custom_scorm.user_status');
+
+  $scorm_user_status->setUserStatusFromScormCommitData($opigno_scorm_sco_id, $data);
+  \Drupal\Core\Cache\Cache::invalidateTags(['user:' . \Drupal::currentUser()->id()]);
+}

@@ -122,7 +122,7 @@ class UserStatusHandler {
    */
   protected function saveUserStatus(UserStatus $scorm_user_status): void {
     $scorm_user_statuses = $this->getAllForCurrentUser();
-    $scorm_user_statuses[$scorm_user_status->scorm_id] = $scorm_user_status;
+    $scorm_user_statuses[$scorm_user_status->sco_id] = $scorm_user_status;
     $this->userData->set('custom_scorm', $this->currentUser->id(), 'user_status', $scorm_user_statuses);
   }
 }
